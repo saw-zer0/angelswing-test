@@ -58,3 +58,5 @@ gem "jwt", "~> 3.2"
 gem "olive_branch", "~> 4.0"
 
 gem "jsonapi-serializer", "~> 2.2"
+
+gem "pundit", "~> 2.5"

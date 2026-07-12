@@ -7,12 +7,12 @@ class Api::V1::ContentsController < ApplicationController
   def index
     @contents = Content.all
 
-    render json: @contents
+    render json: Api::V1::ContentSerializer.new(@contents).serializable_hash.to_json
   end
 
   # GET /contents/1
   def show
-    render json: @content
+    render json: Api::V1::ContentSerializer.new(@content).serializable_hash.to_json
   end
 
   # POST /contents
@@ -29,8 +29,10 @@ class Api::V1::ContentsController < ApplicationController
 
   # PATCH/PUT /contents/1
   def update
+    Rails.logger.debug "Current User: #{@current_user.inspect}, Content: #{@content.inspect}"
+    authorize @content
     if @content.update(content_params)
-      render json: @content
+      render json: Api::V1::ContentSerializer.new(@content).serializable_hash.to_json
     else
       render json: @content.errors, status: :unprocessable_content
     end
@@ -38,6 +40,7 @@ class Api::V1::ContentsController < ApplicationController
 
   # DELETE /contents/1
   def destroy
+    authorize @content
     @content.destroy!
   end
 
@@ -49,6 +52,6 @@ class Api::V1::ContentsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def content_params
-      params.expect(content: [ :title, :body, :user_id ])
+      params.expect(content: [ :title, :body ])
     end
 end
