@@ -34,5 +34,9 @@ module AngelswingTest
                           inflection:       "camel",
                           exclude_params:   excluded_routes,
                           exclude_response: excluded_routes
+
+    config.generators do |g|
+      g.test_framework :rspec
+    end
   end
 end

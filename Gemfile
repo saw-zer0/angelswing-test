@@ -47,8 +47,12 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-  
+
   gem "dotenv-rails", "~> 3.2"
+
+  gem "rspec-rails", "~> 8.0"
+  gem "factory_bot_rails", "~> 6.5"
+  gem "faker", "~> 3.8"
 end
 
 
@@ -60,3 +64,7 @@ gem "olive_branch", "~> 4.0"
 gem "jsonapi-serializer", "~> 2.2"
 
 gem "pundit", "~> 2.5"
+
+group :test do
+  gem "shoulda-matchers", "~> 8.0"
+end

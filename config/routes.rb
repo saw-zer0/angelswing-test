@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       post "auth/signin", to: "auth#signin"
+      post "auth/authenticate", to: "auth#authenticate"
       post "users/signup", to: "users#create"
       resources :contents
       resources :users, only: %i[ index show update destroy ]

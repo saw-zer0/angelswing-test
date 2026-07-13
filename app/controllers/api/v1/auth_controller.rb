@@ -21,10 +21,11 @@ class Api::V1::AuthController < ApplicationController
   def authenticate
     header = request.headers["Authorization"]
     header = header.split(" ").last if header
+
     begin
       decoded = JwtService.decode(header)
       @current_user = User.find(decoded[:user_id])
-    rescue ActiveRecord::RecordNotFound, JWT::DecodeError
+    rescue ActiveRecord::RecordNotFound, JWT::DecodeError, StandardError
       render json: { error: "Unauthorized" }, status: :unauthorized
     end
   end
