@@ -94,9 +94,10 @@ test:
 production:
   primary: &primary_production
     <<: *default
-    database: angelswing_test_production
-    username: angelswing_test
-    password: <%= ENV["ANGELSWING_TEST_DATABASE_PASSWORD"] %>
+    adapter: postgresql
+    encoding: unicode
+    pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+    url: <%= ENV["ANGELSWING_TEST_DATABASE_URL"] %>
   cache:
     <<: *primary_production
     database: angelswing_test_production_cache

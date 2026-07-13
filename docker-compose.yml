@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: angelswing_test_development
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d angelswing_test_development"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      RAILS_ENV: development
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432  # FIX 1: Set to internal container port 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      SECRET_KEY_BASE: development-secret
+      BUNDLE_WITHOUT: "" # FIX 2: Override Dockerfile to allow development/test gems
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/rails
+      - bundle_data:/usr/local/bundle
+    command: >
+      bash -lc "rm -f tmp/pids/server.pid && bundle install && bin/rails db:prepare && bundle exec puma -C config/puma.rb"
+
+volumes:
+  postgres_data:
+  bundle_data:

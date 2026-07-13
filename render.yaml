@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: angelswing-test
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: SECRET_KEY_BASE
+        generateValue: true
+      - key: RAILS_SERVE_STATIC_FILES
+        value: true
+      - key: ANGELSWING_TEST_DATABASE_URL
+        fromDatabase:
+          name: angelswing-test-db
+          property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: angelswing-test-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: angelswing-test-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: angelswing-test-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: angelswing-test-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: angelswing-test-db
+          property: database
+
+databases:
+  - name: angelswing-test-db
+    databaseName: angelswing_test_production
+    user: angelswing_test
+    plan: free
