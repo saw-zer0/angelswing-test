@@ -8,6 +8,6 @@ class JwtService
         decoded = JWT.decode(token, SECRET_KEY, true, algorithm: "HS256")[0]
         HashWithIndifferentAccess.new(decoded)
     rescue JWT::DecodeError => e
-        raise StandardError.new("Invalid token: #{e.message}")
+        raise JWT::DecodeError, "Invalid token: #{e.message}"
     end
 end

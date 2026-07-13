@@ -4,12 +4,13 @@ RSpec.describe "Users", type: :request do
   describe "POST /api/v1/users/signup" do
     let(:valid_params) do
       {
-        user: {
-          first_name: "Jane",
-          last_name: "Doe",
-          email: "jane@example.com",
-          password: "StrongPassword123!"
-        }
+        user: attributes_for(
+          :user,
+          first_name: Faker::Name.first_name,
+          last_name: Faker::Name.last_name,
+          email: Faker::Internet.unique.email,
+          password: Faker::Internet.password(min_length: 12, mix_case: true, special_characters: true)
+        )
       }
     end
 
@@ -20,7 +21,7 @@ RSpec.describe "Users", type: :request do
 
       expect(response).to have_http_status(:ok)
       parsed_body = JSON.parse(response.body)
-      expect(parsed_body.dig("data", "attributes", "email")).to eq("jane@example.com")
+      expect(parsed_body.dig("data", "attributes", "email")).to eq(valid_params[:user][:email])
       expect(parsed_body.dig("data", "attributes", "token")).to be_present
     end
 
@@ -29,8 +30,8 @@ RSpec.describe "Users", type: :request do
         user: {
           first_name: "",
           last_name: "",
-          email: "invalid-email",
-          password: "weak"
+          email: "invalid-email#{Faker::Number.number(digits: 3)}",
+          password: Faker::Internet.password(min_length: 6)
         }
       }
 
@@ -63,20 +64,32 @@ RSpec.describe "Users", type: :request do
       expect(parsed_body["id"]).to eq(user.id)
       expect(parsed_body["email"]).to eq(user.email)
     end
+
+    it "returns a JSON error for a missing user" do
+      get "/api/v1/users/999999"
+
+      expect(response).to have_http_status(:not_found)
+      parsed_body = JSON.parse(response.body)
+      expect(parsed_body["error"]).to eq("Not Found")
+    end
   end
 
   describe "PATCH /api/v1/users/:id" do
     let!(:user) { create(:user) }
 
     it "updates the user" do
+      updated_first_name = Faker::Name.first_name
+
       patch "/api/v1/users/#{user.id}", params: {
         user: {
-          first_name: "Updated"
+          first_name: updated_first_name
         }
       }
 
       expect(response).to have_http_status(:ok)
-      expect(user.reload.first_name).to eq("Updated")
+      parsed_body = JSON.parse(response.body)
+      expect(user.reload.first_name).to eq(updated_first_name)
+      expect(parsed_body.dig("data", "attributes", "name")).to include(updated_first_name)
     end
   end
 

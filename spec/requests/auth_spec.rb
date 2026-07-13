@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe "Auth", type: :request do
   describe "POST /api/v1/auth/signin" do
-    let(:user) { create(:user, email: "test@example.com") }
+    let(:user) { create(:user, email: Faker::Internet.unique.email) }
 
     it "returns a token for valid credentials" do
       post "/api/v1/auth/signin", params: {
@@ -22,13 +22,13 @@ RSpec.describe "Auth", type: :request do
       post "/api/v1/auth/signin", params: {
         auth: {
           email: user.email,
-          password: "wrong-password"
+          password: Faker::Internet.password(min_length: 12, mix_case: true, special_characters: true)
         }
       }
 
-      expect(response).to have_http_status(:unauthorized)
+      expect(response).to have_http_status(:not_found)
       parsed_body = JSON.parse(response.body)
-      expect(parsed_body["error"]).to eq("Invalid email or password")
+      expect(parsed_body["error"]).to eq("Not Found")
     end
   end
 

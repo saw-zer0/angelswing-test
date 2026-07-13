@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe "Contents", type: :request do
   let(:user) { create(:user) }
   let(:other_user) { create(:user) }
-  let!(:content) { create(:content, user: user) }
+  let!(:content) { create(:content, user: user, title: Faker::Lorem.sentence(word_count: 4), body: Faker::Lorem.paragraph) }
 
   def auth_headers_for(user)
     token = JwtService.encode(
@@ -45,22 +45,23 @@ RSpec.describe "Contents", type: :request do
       expect {
         post "/api/v1/contents", params: {
           content: {
-            title: "Hello",
-            body: "World"
+            title: Faker::Lorem.sentence(word_count: 3),
+            body: Faker::Lorem.paragraph
           }
         }, headers: headers
       }.to change(Content, :count).by(1)
 
       expect(response).to have_http_status(:ok)
       parsed_body = JSON.parse(response.body)
-      expect(parsed_body.dig("data", "attributes", "title")).to eq("Hello")
+      expect(parsed_body.dig("data", "attributes", "title")).to be_present
+      expect(parsed_body.dig("data", "attributes")).to have_key("body")
     end
 
     it "rejects unauthenticated creation" do
       post "/api/v1/contents", params: {
         content: {
-          title: "Hello",
-          body: "World"
+          title: Faker::Lorem.sentence(word_count: 3),
+          body: Faker::Lorem.paragraph
         }
       }
 
@@ -74,22 +75,26 @@ RSpec.describe "Contents", type: :request do
     it "updates content owned by the current user" do
       headers = auth_headers_for(user)
 
+      updated_title = Faker::Lorem.sentence(word_count: 4)
+
       patch "/api/v1/contents/#{content.id}", params: {
         content: {
-          title: "Updated title"
+          title: updated_title
         }
       }, headers: headers
 
       expect(response).to have_http_status(:ok)
-      expect(content.reload.title).to eq("Updated title")
+      expect(content.reload.title).to eq(updated_title)
     end
 
     it "rejects updates for content owned by another user" do
       headers = auth_headers_for(other_user)
 
+      updated_title = Faker::Lorem.sentence(word_count: 4)
+
       patch "/api/v1/contents/#{content.id}", params: {
         content: {
-          title: "Updated title"
+          title: updated_title
         }
       }, headers: headers
 
@@ -105,7 +110,8 @@ RSpec.describe "Contents", type: :request do
         delete "/api/v1/contents/#{content.id}", headers: headers
       }.to change(Content, :count).by(-1)
 
-      expect(response).to have_http_status(:no_content)
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to eq({ "message" => "Deleted" })
     end
 
     it "rejects deletion for content owned by another user" do

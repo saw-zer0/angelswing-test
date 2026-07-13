@@ -7,41 +7,35 @@ class Api::V1::ContentsController < ApplicationController
   def index
     @contents = Content.all
 
-    render json: Api::V1::ContentSerializer.new(@contents).serializable_hash.to_json
+    render json: Api::V1::ContentSerializer.new(@contents).serializable_hash
   end
 
   # GET /contents/1
   def show
-    render json: Api::V1::ContentSerializer.new(@content).serializable_hash.to_json
+    render json: Api::V1::ContentSerializer.new(@content).serializable_hash
   end
 
   # POST /contents
   def create
     user = @current_user
     @content = Content.new(content_params.merge(user: user))
+    @content.save!
 
-    if @content.save
-      render json: Api::V1::ContentSerializer.new(@content).serializable_hash.to_json
-    else
-      render json: @content.errors, status: :unprocessable_content
-    end
+    render json: Api::V1::ContentSerializer.new(@content).serializable_hash
   end
 
   # PATCH/PUT /contents/1
   def update
-    Rails.logger.debug "Current User: #{@current_user.inspect}, Content: #{@content.inspect}"
     authorize @content
-    if @content.update(content_params)
-      render json: Api::V1::ContentSerializer.new(@content).serializable_hash.to_json
-    else
-      render json: @content.errors, status: :unprocessable_content
-    end
+    @content.update!(content_params)
+    render json: Api::V1::ContentSerializer.new(@content).serializable_hash
   end
 
   # DELETE /contents/1
   def destroy
     authorize @content
     @content.destroy!
+    render json: { message: "Deleted" }, status: :ok
   end
 
   private

@@ -14,7 +14,7 @@ class Api::V1::AuthController < ApplicationController
       serialized_user[:data][:attributes].merge!(token: token)
       render json: serialized_user
     else
-      render json: { error: "Invalid email or password" }, status: :unauthorized
+      raise ActiveRecord::RecordNotFound, "Invalid email or password"
     end
   end
 
@@ -22,11 +22,7 @@ class Api::V1::AuthController < ApplicationController
     header = request.headers["Authorization"]
     header = header.split(" ").last if header
 
-    begin
-      decoded = JwtService.decode(header)
-      @current_user = User.find(decoded[:user_id])
-    rescue ActiveRecord::RecordNotFound, JWT::DecodeError, StandardError
-      render json: { error: "Unauthorized" }, status: :unauthorized
-    end
+    decoded = JwtService.decode(header)
+    @current_user = User.find(decoded[:user_id])
   end
 end

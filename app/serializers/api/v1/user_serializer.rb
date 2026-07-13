@@ -1,5 +1,7 @@
 class Api::V1::UserSerializer
   include JSONAPI::Serializer
+  set_key_transform :camel_lower
+
   attributes :email
 
   attribute :name do |user|
