@@ -1,24 +1,35 @@
-# README
+# Angelswing Test
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+A Rails API application with authentication, content management, and basic authorization.
 
-Things you may want to cover:
+## Demo
 
-* Ruby version
+Deployed demo: https://angelswing-test.onrender.com/api/v1/
 
-* System dependencies
+## Run locally
 
-* Configuration
+### Prerequisites
+- Docker
+- Docker Compose
 
-* Database creation
+### Start the app
+```bash
+docker compose up --build
+```
 
-* Database initialization
+The app will be available at:
+- http://localhost:3000
 
-* How to run the test suite
+### Stop the app
+```bash
+docker compose down
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+### Run tests
+```bash
+docker compose run --rm web bundle exec rspec
+```
 
-* Deployment instructions
-
-* ...
+## Notes
+- The Compose setup starts a PostgreSQL container automatically.
+- The app uses the development environment by default.
