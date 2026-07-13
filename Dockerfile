@@ -9,12 +9,12 @@ ENV RAILS_ENV=production \
 
 WORKDIR /rails
 
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev pkg-config postgresql-client && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
 # 2. Build Stage (Installs gems, then gets discarded)
 FROM base AS build
-
-# Only install what is strictly needed to compile native gem extensions
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential libpq-dev
 
 COPY Gemfile Gemfile.lock ./
 RUN bundle install
