@@ -6,6 +6,7 @@ Rails.application.routes.draw do
       post "users/signup", to: "users#create"
       resources :contents
       resources :users, only: %i[ index show update destroy ]
+      get "content", to: "contents#index"
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
