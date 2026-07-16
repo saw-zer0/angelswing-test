@@ -21,8 +21,18 @@ RSpec.describe "Users", type: :request do
 
       expect(response).to have_http_status(:ok)
       parsed_body = JSON.parse(response.body)
-      expect(parsed_body.dig("data", "attributes", "email")).to eq(valid_params[:user][:email])
-      expect(parsed_body.dig("data", "attributes", "token")).to be_present
+      data = parsed_body.fetch("data")
+      attributes = data.fetch("attributes")
+
+      expect(parsed_body).to include("data")
+      expect(data.fetch("type")).to eq("user")
+      expect(data.fetch("id")).to be_present
+      expect(attributes.fetch("email")).to eq(valid_params[:user][:email])
+      expect(attributes.fetch("name")).to eq("#{valid_params[:user][:first_name]} #{valid_params[:user][:last_name]}")
+      expect(attributes.fetch("country")).to eq(valid_params[:user][:country])
+      expect(attributes.fetch("token")).to be_present
+      expect(attributes.fetch("createdAt")).to be_present
+      expect(attributes.fetch("updatedAt")).to be_present
     end
 
     it "returns validation errors for invalid signup data" do

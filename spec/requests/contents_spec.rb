@@ -24,7 +24,17 @@ RSpec.describe "Contents", type: :request do
 
       expect(response).to have_http_status(:ok)
       parsed_body = JSON.parse(response.body)
-      expect(parsed_body["data"].size).to eq(2)
+      data = parsed_body.fetch("data")
+      first_content = data.first
+      first_attributes = first_content.fetch("attributes")
+
+      expect(data).to be_an(Array)
+      expect(data.size).to eq(2)
+      expect(first_content.fetch("type")).to eq("content")
+      expect(first_attributes.fetch("title")).to be_present
+      expect(first_attributes.fetch("body")).to be_present
+      expect(first_attributes.fetch("createdAt")).to be_present
+      expect(first_attributes.fetch("updatedAt")).to be_present
     end
   end
 
@@ -41,20 +51,29 @@ RSpec.describe "Contents", type: :request do
   describe "POST /api/v1/contents" do
     it "creates content for an authenticated user" do
       headers = auth_headers_for(user)
+      title = Faker::Lorem.sentence(word_count: 3)
+      body = Faker::Lorem.paragraph
 
       expect {
         post "/api/v1/contents", params: {
           content: {
-            title: Faker::Lorem.sentence(word_count: 3),
-            body: Faker::Lorem.paragraph
+            title: title,
+            body: body
           }
         }, headers: headers
       }.to change(Content, :count).by(1)
 
       expect(response).to have_http_status(:ok)
       parsed_body = JSON.parse(response.body)
-      expect(parsed_body.dig("data", "attributes", "title")).to be_present
-      expect(parsed_body.dig("data", "attributes")).to have_key("body")
+      data = parsed_body.fetch("data")
+      attributes = data.fetch("attributes")
+
+      expect(parsed_body).to include("data")
+      expect(data.fetch("type")).to eq("content")
+      expect(attributes.fetch("title")).to eq(title)
+      expect(attributes.fetch("body")).to eq(body)
+      expect(attributes.fetch("createdAt")).to be_present
+      expect(attributes.fetch("updatedAt")).to be_present
     end
 
     it "rejects unauthenticated creation" do
@@ -84,6 +103,15 @@ RSpec.describe "Contents", type: :request do
       }, headers: headers
 
       expect(response).to have_http_status(:ok)
+      parsed_body = JSON.parse(response.body)
+      data = parsed_body.fetch("data")
+      attributes = data.fetch("attributes")
+
+      expect(data.fetch("type")).to eq("content")
+      expect(attributes.fetch("title")).to eq(updated_title)
+      expect(attributes.fetch("body")).to eq(content.reload.body)
+      expect(attributes.fetch("createdAt")).to be_present
+      expect(attributes.fetch("updatedAt")).to be_present
       expect(content.reload.title).to eq(updated_title)
     end
 

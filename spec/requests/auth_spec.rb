@@ -14,8 +14,20 @@ RSpec.describe "Auth", type: :request do
 
       expect(response).to have_http_status(:ok)
       parsed_body = JSON.parse(response.body)
-      expect(parsed_body.dig("data", "attributes", "email")).to eq(user.email)
-      expect(parsed_body.dig("data", "attributes", "token")).to be_present
+      data = parsed_body.fetch("data")
+      attributes = data.fetch("attributes")
+
+      expect(parsed_body).to include("data")
+      expect(data.fetch("type")).to eq("user")
+      expect(data.fetch("id").to_s).to eq(user.id.to_s)
+      expect(attributes.fetch("email")).to eq(user.email)
+      expect(attributes.fetch("token")).to be_present
+      expect(attributes.fetch("name")).to eq(user.first_name + " " + user.last_name)
+      expect(attributes.fetch("country")).to eq(user.country)
+      expect(attributes.fetch("createdAt")).to be_present
+      expect(attributes.fetch("updatedAt")).to be_present
+      expect(Time.zone.parse(attributes.fetch("createdAt"))).to be_within(1.second).of(user.created_at)
+      expect(Time.zone.parse(attributes.fetch("updatedAt"))).to be_within(1.second).of(user.updated_at)
     end
 
     it "returns unauthorized for invalid credentials" do
