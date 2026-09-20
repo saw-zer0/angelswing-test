@@ -57,7 +57,7 @@ end
 
 
 gem "bcrypt", "~> 3.1"
-gem "jwt", "~> 3.2"
+gem "jwt", "~> 3.3"
 
 gem "olive_branch", "~> 4.0"
 
